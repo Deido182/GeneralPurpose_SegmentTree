@@ -25,7 +25,7 @@ to obtain the required structure.
   }
   
 - Function3 \<T\> f3 is necessary for the lazy propagation. It explains how to change the value of an
-  internal node (which cover some range). Let's suppose to want a structure which allows
+  internal node (which covers a range). Let's suppose to want a structure which allows
   update(l, r, increment) and query(l, r) = sum(a[l], ..., a[r]).
   Now let's suppose to reach an internal node N which covers exactly the whole range [l, r].
   We need to change its value without going on. Indeed, we will go on with the update of its subtree
