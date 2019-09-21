@@ -114,7 +114,10 @@ class SegmentTree <T> {
 		int blockSize = 1 << log2h;
 		while(l <= r) {
 			if(l + blockSize - 1 <= r) {
-				ans = f1.compute(ans, tree[((1 << (log2n - log2h)) - 1) + l / blockSize].value);
+				int index = ((1 << (log2n - log2h)) - 1) + l / blockSize;
+				if(pushDown[index] != null) 
+					pushDown(index);
+				ans = f1.compute(ans, tree[index].value);
 				l += blockSize;
 				log2h = log2(l & (~(l - 1)));
 				blockSize = 1 << log2h;
