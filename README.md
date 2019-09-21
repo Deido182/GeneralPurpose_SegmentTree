@@ -15,3 +15,11 @@ to obtain the required structure.
       return v1;
     return v1.compareTo(v2) <= 0 ? v1 : v2;
   }
+                               
+- Function2 <T> f2 explains how to replace a leaf during an update.
+  For example, if you need a Segment Tree which support an operation such that update(pos, increment),
+  the required f2 would be something like:
+  
+  Function <T> f2 = (T v, T increment) -> {
+    return v == null ? increment : v.add(increment);
+  }
