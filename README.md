@@ -32,4 +32,4 @@ to obtain the required structure.
   only after a call of query(l', r') with l <= l' <= r' <= r.
   In such cases f3 would say something like: N.value.add(increment.multiply(r - l + 1)).
 
-T has to be a type which supports the required operations needed by the desired Segment Tree of course.
+T has to be a type which supports the operations needed by the desired Segment Tree of course.
