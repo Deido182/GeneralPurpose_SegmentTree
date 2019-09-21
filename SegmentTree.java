@@ -34,21 +34,34 @@ interface Function3 <T> {
 }
 
 class SegmentTree <T> {
+
+	private static int log2(int n) {
+		int log2n = 31 - Integer.numberOfLeadingZeros(n);
+		return 1 << log2n == n ? log2n : log2n + 1;
+	}
+	
+	
 	Node <T>[] tree;
 	T[] leaves;
 	T[] pushDown;
 	Function1 <T> f1;
 	Function2 <T> f2;
 	Function3 <T> f3;
+	private int log2n;
+	private int newSize;
 	
 	public SegmentTree(T[] leaves, Function1 <T> f1, Function2 <T> f2, Function3 <T> f3) {
-		this.leaves = leaves;
-		this.tree = new Node[this.leaves.length * 4];
-		this.pushDown = (T[]) new Object[this.leaves.length * 4];
+		log2n = log2(leaves.length);
+		int newSize = 1 << log2n;
+		this.leaves = (T[]) new Object[newSize];
+		for(int i = 0; i < leaves.length; i ++)
+			this.leaves[i] = leaves[i];
+		this.tree = new Node[newSize << 1];
+		this.pushDown = (T[]) new Object[newSize << 1];
 		this.f1 = f1;
 		this.f2 = f2;
 		this.f3 = f3;
-		this.build(0, this.leaves.length - 1, 0);
+		this.build(0, newSize - 1, 0);
 	}
 
 	private void build(int l, int r, int index) {
@@ -95,24 +108,21 @@ class SegmentTree <T> {
 		update(0, l, r, value);
 	}
 	
-	private T query(int index, int l, int r) {
-		if(l > r)
-			return null;
-		if(tree[index] == null)
-			return null;
-		if(pushDown[index] != null) 
-			pushDown(index);
-		if(tree[index].l == l && tree[index].r == r)
-			return tree[index].value;
-		T ans = null;
-		if(l <= (tree[index].l + tree[index].r) >> 1) 
-			ans = f1.compute(ans, query((index << 1) + 1, l, min(r, (tree[index].l + tree[index].r) >> 1)));
-		if(r >= ((tree[index].l + tree[index].r) >> 1) + 1)
-			ans = f1.compute(ans, query((index << 1) + 2, max(l, ((tree[index].l + tree[index].r) >> 1) + 1), r));
-		return ans;
-	}
-	
 	public T query(int l, int r) {
-		return query(0, l, r);
+		T ans = null;
+		int log2h = log2(l & (~(l - 1)));
+		int blockSize = 1 << log2h;
+		while(l <= r) {
+			if(l + blockSize - 1 <= r) {
+				ans = f1.compute(ans, tree[((1 << (log2n - log2h)) - 1) + l / blockSize].value);
+				l += blockSize;
+				log2h = log2(l & (~(l - 1)));
+				blockSize = 1 << log2h;
+			} else {
+				log2h --;
+				blockSize >>= 1;
+			}
+		}
+		return ans;
 	}
 }
