@@ -17,7 +17,7 @@ to obtain the required structure.
   }
                                
 - Function2 \<T\> f2 explains how to replace a leaf during an update.
-  For example, if you need a Segment Tree which support an operation such that update(pos, increment),
+  For example, if you need a Segment Tree which support an operation such as update(pos, increment),
   the required f2 would be something like:
   
   Function2 \<T\> f2 = (T v, T increment) -> {
