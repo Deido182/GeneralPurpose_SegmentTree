@@ -12,29 +12,29 @@ class Node <T> {
 		this.value = value;
 	}
 }
-
+ 
 /*
  * Remember to check v1 == null and v2 == null
  */
-
+ 
 interface Function1 <T> {
 	public T compute(T v1, T v2);
 }
-
+ 
 /*
  * Remember to check v1 == null and v2 == null
  */
-
+ 
 interface Function2 <T> {
 	public T modify(T v1, T v2);
 }
-
+ 
 interface Function3 <T> {
 	public T range(T v, int firstIn, int lastIn);
 }
-
+ 
 class SegmentTree <T> {
-
+ 
 	private static int log2(int n) {
 		int log2n = 31 - Integer.numberOfLeadingZeros(n);
 		return 1 << log2n == n ? log2n : log2n + 1;
@@ -63,7 +63,7 @@ class SegmentTree <T> {
 		this.f3 = f3;
 		this.build(0, newSize - 1, 0);
 	}
-
+ 
 	private void build(int l, int r, int index) {
 		if(l == r) {
 			tree[index] = new Node <T> (l, r, leaves[l]);
