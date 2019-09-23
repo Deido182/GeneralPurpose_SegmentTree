@@ -129,10 +129,10 @@ class SegmentTree <T> {
 	public T query(int l, int r) {
 		T ans = null;
 		int log2h = log2(l & (~(l - 1)));
-		int blockSize = 1 << log2h;
-		while(l <= r && blockSize >= 1) {
-			if(l + blockSize - 1 <= r) {
-				int index = ((1 << (log2n - log2h)) - 1) + l / blockSize;
+		int blockSize;
+		while(l <= r) {
+			if(l + (blockSize = 1 << log2h) - 1 <= r) {
+				int index = ((1 << (log2n - log2h)) - 1) + (l >> log2h);
 				if(pushDown[index] != null) 
 					pushDown(index);
 				ans = f1.compute(ans, tree[index].value);
@@ -140,16 +140,13 @@ class SegmentTree <T> {
 					// up
 					l += blockSize;
 					while(((1 << (++ log2h)) & l) == 0);
-					blockSize = 1 << log2h;
 				} else {
 					// down
 					l |= blockSize;
 					log2h --;
-					blockSize >>= 1;
 				}
 			} else {
 				log2h --;
-				blockSize >>= 1;
 			}
 		}
 		return ans;
