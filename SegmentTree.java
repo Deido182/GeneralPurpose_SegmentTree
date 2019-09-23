@@ -108,19 +108,45 @@ class SegmentTree <T> {
 		update(0, l, r, value);
 	}
 	
+	/*
+	 * Moving from recursive to iterative does not affect the time complexity:
+	 * query(l, r) remains O(log N)
+	 * 
+	 * Proof:
+	 * there are 2 phases: up and down. If you reach the down phase you will 
+	 * never be able to go back to the up phase. They are both O(log N), so we are done.
+	 * 
+	 * For the proof of correctness...
+	 * at each step we need the greatest x such that (l + 2^x - 1 <= r) && 2^x divides l.
+	 * If (l & 2^x) > 0 on the next step we could use x' >= x.
+	 * However, from the down phase the sequence of x will be strictly descending.
+	 * Indeed: the greatest y such that 2^y divides (l + 2^x) when (l & 2^x) = 0 is 
+	 * x. Is y = x possible? No. (l & 2^x) = 0 means that, when we chose x as greatest 
+	 * exponent, 2^(x+1) was a divisor of l. So in that case we would have chosen x+1 
+	 * instead of x twice.
+	 */
+	
 	public T query(int l, int r) {
 		T ans = null;
 		int log2h = log2(l & (~(l - 1)));
 		int blockSize = 1 << log2h;
-		while(l <= r) {
+		while(l <= r && blockSize >= 1) {
 			if(l + blockSize - 1 <= r) {
 				int index = ((1 << (log2n - log2h)) - 1) + l / blockSize;
 				if(pushDown[index] != null) 
 					pushDown(index);
 				ans = f1.compute(ans, tree[index].value);
-				l += blockSize;
-				log2h = log2(l & (~(l - 1)));
-				blockSize = 1 << log2h;
+				if((l & blockSize) > 0) {
+					// up
+					l += blockSize;
+					while(((1 << (++ log2h)) & l) == 0);
+					blockSize = 1 << log2h;
+				} else {
+					// down
+					l |= blockSize;
+					log2h --;
+					blockSize >>= 1;
+				}
 			} else {
 				log2h --;
 				blockSize >>= 1;
