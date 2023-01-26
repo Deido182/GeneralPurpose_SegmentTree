@@ -1,6 +1,6 @@
 import static java.lang.Math.min;
 import static java.lang.Math.max;
-
+	    
 class Node <T> {
 	int l;
 	int r;
@@ -17,7 +17,7 @@ class Node <T> {
  * Remember to check v1 == null and v2 == null
  */
 
-interface Function1 <T> {
+interface ComputeFunction <T> {
 	public T compute(T v1, T v2);
 }
 
@@ -25,11 +25,11 @@ interface Function1 <T> {
  * Remember to check v1 == null and v2 == null
  */
 
-interface Function2 <T> {
+interface ModifyFunction <T> {
 	public T modify(T v1, T v2);
 }
 
-interface Function3 <T> {
+interface RangeFunction <T> {
 	public T range(T v, int firstIn, int lastIn);
 }
 
@@ -37,17 +37,17 @@ class SegmentTree <T> {
 	Node <T>[] tree;
 	T[] leaves;
 	T[] pushDown;
-	Function1 <T> f1;
-	Function2 <T> f2;
-	Function3 <T> f3;
+	ComputeFunction <T> compute;
+	ModifyFunction <T> modify;
+	RangeFunction <T> range;
 	
-	public SegmentTree(T[] leaves, Function1 <T> f1, Function2 <T> f2, Function3 <T> f3) {
+	public SegmentTree(T[] leaves, ComputeFunction <T> f1, ModifyFunction <T> f2, RangeFunction <T> f3) {
 		this.leaves = leaves;
 		this.tree = new Node[this.leaves.length * 4];
 		this.pushDown = (T[]) new Object[this.leaves.length * 4];
-		this.f1 = f1;
-		this.f2 = f2;
-		this.f3 = f3;
+		this.compute = f1;
+		this.modify = f2;
+		this.range = f3;
 		this.build(0, this.leaves.length - 1, 0);
 	}
 
@@ -58,8 +58,7 @@ class SegmentTree <T> {
 		}
 		this.build(l, (l + r) >> 1, (index << 1) + 1);
 		this.build(((l + r) >> 1) + 1, r, (index << 1) + 2);
-		tree[index] = new Node <T> (l, r, f1.compute(tree[(index << 1) + 1].value, 
-													tree[(index << 1) + 2].value));
+		tree[index] = new Node <T> (l, r, compute.compute(tree[(index << 1) + 1].value, tree[(index << 1) + 2].value));
 	}
 		
 	private void update(int index, int l, int r, T value) {
@@ -68,12 +67,12 @@ class SegmentTree <T> {
 		if(tree[index] == null)
 			return;
 		if(tree[index].l == tree[index].r) {
-			tree[index].value = leaves[tree[index].l] = f2.modify(leaves[tree[index].l], value);
+			tree[index].value = leaves[tree[index].l] = modify.modify(leaves[tree[index].l], value);
 			return;
 		}
 		if(tree[index].l == l && tree[index].r == r) {
-			pushDown[index] = f2.modify(pushDown[index], value);
-			tree[index].value = f2.modify(tree[index].value, f3.range(value, tree[index].l, tree[index].r));
+			pushDown[index] = modify.modify(pushDown[index], value);
+			tree[index].value = modify.modify(tree[index].value, range.range(value, tree[index].l, tree[index].r));
 			return;
 		}
 		if(pushDown[index] != null) 
@@ -82,7 +81,7 @@ class SegmentTree <T> {
 			update((index << 1) + 1, l, min(r, (tree[index].l + tree[index].r) >> 1), value);
 		if(r >= ((tree[index].l + tree[index].r) >> 1) + 1) 
 			update((index << 1) + 2, max(l, ((tree[index].l + tree[index].r) >> 1) + 1), r, value);
-		tree[index].value = f1.compute(tree[(index << 1) + 1].value, tree[(index << 1) + 2].value);
+		tree[index].value = compute.compute(tree[(index << 1) + 1].value, tree[(index << 1) + 2].value);
 	}
 	
 	private void pushDown(int index) {
@@ -106,9 +105,9 @@ class SegmentTree <T> {
 			return tree[index].value;
 		T ans = null;
 		if(l <= (tree[index].l + tree[index].r) >> 1) 
-			ans = f1.compute(ans, query((index << 1) + 1, l, min(r, (tree[index].l + tree[index].r) >> 1)));
+			ans = compute.compute(ans, query((index << 1) + 1, l, min(r, (tree[index].l + tree[index].r) >> 1)));
 		if(r >= ((tree[index].l + tree[index].r) >> 1) + 1)
-			ans = f1.compute(ans, query((index << 1) + 2, max(l, ((tree[index].l + tree[index].r) >> 1) + 1), r));
+			ans = compute.compute(ans, query((index << 1) + 2, max(l, ((tree[index].l + tree[index].r) >> 1) + 1), r));
 		return ans;
 	}
 	
