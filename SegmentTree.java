@@ -10,9 +10,9 @@ class SegmentTree <T> {
 		Node leftNode;
 		Node rightNode;
 			
-		public Node(int fi, int li, T value) {
-			this.firstInPos = fi;
-			this.lastInPos = li;
+		public Node(int firstIn, int lastIn, T value) {
+			this.firstInPos = firstIn;
+			this.lastInPos = lastIn;
 			this.value = value;
 		}
 		
@@ -66,12 +66,12 @@ class SegmentTree <T> {
 		roots.add(build(0, N - 1, leaves));
 	}
 	
-	private Node build(int l, int r, T[] leaves) {
-		if(l == r) 
-			return new Node(l, r, leaves[l]);
-		Node curr = new Node(l, r, null);
-		curr.leftNode = this.build(l, (l + r) >> 1, leaves);
-		curr.rightNode = this.build(((l + r) >> 1) + 1, r, leaves);
+	private Node build(int firstIn, int lastIn, T[] leaves) {
+		if(firstIn == lastIn) 
+			return new Node(firstIn, lastIn, leaves[firstIn]);
+		Node curr = new Node(firstIn, lastIn, null);
+		curr.leftNode = this.build(firstIn, (firstIn + lastIn) >> 1, leaves);
+		curr.rightNode = this.build(((firstIn + lastIn) >> 1) + 1, lastIn, leaves);
 		curr.value = compute.compute(curr.leftNode.value, curr.rightNode.value);
 		return curr;
 	}
@@ -84,61 +84,61 @@ class SegmentTree <T> {
 		node.pushDown = null;
 	}
 		
-	private Node update(Node oldNode, int l, int r, T value) {
-		if(l > r)
+	private Node update(Node oldNode, int firstIn, int lastIn, T value) {
+		if(firstIn > lastIn)
 			return null;
 		if(oldNode == null)
-			oldNode = new Node(l, r, null);
+			oldNode = new Node(firstIn, lastIn, null);
     			Node newNode = oldNode.clone();
 		if(newNode.firstInPos == newNode.lastInPos) {
 			newNode.value = modify.modify(newNode.value, value);
 			return newNode;
 		}
-		if(newNode.firstInPos == l && newNode.lastInPos == r) {
+		if(newNode.firstInPos == firstIn && newNode.lastInPos == lastIn) {
 			newNode.value = modify.modify(newNode.value, range.range(value, newNode.firstInPos, newNode.lastInPos));
 			newNode.pushDown = modify.modify(newNode.pushDown, value);
 			return newNode;
 		}
 		pushDown(newNode);
-		if(l <= (newNode.firstInPos + newNode.lastInPos) >> 1) 
-			newNode.leftNode = update(newNode.leftNode, l, min(r, (newNode.firstInPos + newNode.lastInPos) >> 1), value);
-		if(r >= ((newNode.firstInPos + newNode.lastInPos) >> 1) + 1) 
-			newNode.rightNode = update(newNode.rightNode, max(l, ((newNode.firstInPos + newNode.lastInPos) >> 1) + 1), r, value);
+		if(firstIn <= (newNode.firstInPos + newNode.lastInPos) >> 1) 
+			newNode.leftNode = update(newNode.leftNode, firstIn, min(lastIn, (newNode.firstInPos + newNode.lastInPos) >> 1), value);
+		if(lastIn >= ((newNode.firstInPos + newNode.lastInPos) >> 1) + 1) 
+			newNode.rightNode = update(newNode.rightNode, max(firstIn, ((newNode.firstInPos + newNode.lastInPos) >> 1) + 1), lastIn, value);
 		newNode.value = compute.compute(newNode.leftNode != null ? newNode.leftNode.value : null, newNode.rightNode != null ? newNode.rightNode.value : null);
 		return newNode;
 	}
 	
-	public int update(int version, int l, int r, T value) {
-		roots.add(update(roots.get(version), l, r, value));
+	public int update(int version, int firstIn, int lastIn, T value) {
+		roots.add(update(roots.get(version), firstIn, lastIn, value));
 		return lastVersion();
 	}
 	
-	public int update(int l, int r, T value) {
-		return update(lastVersion(), l, r, value);
+	public int update(int firstIn, int lastIn, T value) {
+		return update(lastVersion(), firstIn, lastIn, value);
 	}
 	
-	private T query(Node curr, int l, int r) {
-		if(l > r)
+	private T query(Node curr, int firstIn, int lastIn) {
+		if(firstIn > lastIn)
 			return null;
 		if(curr == null)
 			return null;
 		pushDown(curr);
-		if(curr.firstInPos == l && curr.lastInPos == r)
+		if(curr.firstInPos == firstIn && curr.lastInPos == lastIn)
 			return curr.value;
 		T ans = null;
-		if(l <= (curr.firstInPos + curr.lastInPos) >> 1) 
-			ans = compute.compute(ans, query(curr.leftNode, l, min(r, (curr.firstInPos + curr.lastInPos) >> 1)));
-		if(r >= ((curr.firstInPos + curr.lastInPos) >> 1) + 1)
-			ans = compute.compute(ans, query(curr.rightNode, max(l, ((curr.firstInPos + curr.lastInPos) >> 1) + 1), r));
+		if(firstIn <= (curr.firstInPos + curr.lastInPos) >> 1) 
+			ans = compute.compute(ans, query(curr.leftNode, firstIn, min(lastIn, (curr.firstInPos + curr.lastInPos) >> 1)));
+		if(lastIn >= ((curr.firstInPos + curr.lastInPos) >> 1) + 1)
+			ans = compute.compute(ans, query(curr.rightNode, max(firstIn, ((curr.firstInPos + curr.lastInPos) >> 1) + 1), lastIn));
 		return ans;
 	}
 	
-	public T query(int version, int l, int r) {
-		return query(roots.get(version), l, r);
+	public T query(int version, int firstIn, int lastIn) {
+		return query(roots.get(version), firstIn, lastIn);
 	}
 	
-	public T query(int l, int r) {
-		return query(lastVersion(), l, r);
+	public T query(int firstIn, int lastIn) {
+		return query(lastVersion(), firstIn, lastIn);
 	}
 	
 	public int lastVersion() {
