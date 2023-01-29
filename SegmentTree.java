@@ -1,58 +1,58 @@
 import static java.lang.Math.min;
 import static java.lang.Math.max;
 
-class Node <T> {
-	int firstInPos;
-	int lastInPos;
-	T value;
-	T pushDown;
-	Node <T> leftNode;
-	Node <T> rightNode;
-		
-	public Node(int fi, int li, T value) {
-		this.firstInPos = fi;
-		this.lastInPos = li;
-		this.value = value;
-	}
-	
-	public Node <T> clone() {
-		Node <T> node = new Node <T> (firstInPos, lastInPos, value);
-		node.leftNode = leftNode;
-		node.rightNode = rightNode;
-		node.pushDown = pushDown;
-		return node;
-	}
-	
-	@Override
-	public String toString() {
-		return "( [" + firstInPos + ", " + lastInPos + "] | value: " + value + ", pushDown: " + pushDown + " )";
-	}
-}
-
-/*
- * Remember to check v1 == null and v2 == null
- */
-
-interface ComputeFunction <T> {
-	public T compute(T v1, T v2);
-}
-
-/*
- * Remember to check v1 == null and v2 == null
- */
-
-interface ModifyFunction <T> {
-	public T modify(T v1, T v2);
-}
-
-interface RangeFunction <T> {
-	public T range(T v, int firstIn, int lastIn);
-}
-
 class SegmentTree <T> {
+	class Node {
+		int firstInPos;
+		int lastInPos;
+		T value;
+		T pushDown;
+		Node leftNode;
+		Node rightNode;
+			
+		public Node(int fi, int li, T value) {
+			this.firstInPos = fi;
+			this.lastInPos = li;
+			this.value = value;
+		}
+		
+		public Node clone() {
+			Node node = new Node(firstInPos, lastInPos, value);
+			node.leftNode = leftNode;
+			node.rightNode = rightNode;
+			node.pushDown = pushDown;
+			return node;
+		}
+		
+		@Override
+		public String toString() {
+			return "( [" + firstInPos + ", " + lastInPos + "] | value: " + value + ", pushDown: " + pushDown + " )";
+		}
+	}
+
+	/*
+	 * Remember to check v1 == null and v2 == null
+	 */
+
+	interface ComputeFunction <T> {
+		public T compute(T v1, T v2);
+	}
+
+	/*
+	 * Remember to check v1 == null and v2 == null
+	 */
+
+	interface ModifyFunction <T> {
+		public T modify(T v1, T v2);
+	}
+
+	interface RangeFunction <T> {
+		public T range(T v, int firstIn, int lastIn);
+	}
+	
 	public final int FIRST_VERSION = 0;
 	
-	List<Node <T>> roots;
+	List<Node> roots;
 	ComputeFunction <T> compute;
 	ModifyFunction <T> modify;
 	RangeFunction <T> range;
@@ -66,17 +66,17 @@ class SegmentTree <T> {
 		roots.add(build(0, N - 1, leaves));
 	}
 	
-	private Node <T> build(int l, int r, T[] leaves) {
+	private Node build(int l, int r, T[] leaves) {
 		if(l == r) 
-			return new Node <T> (l, r, leaves[l]);
-		Node <T> curr = new Node <T> (l, r, null);
+			return new Node(l, r, leaves[l]);
+		Node curr = new Node(l, r, null);
 		curr.leftNode = this.build(l, (l + r) >> 1, leaves);
 		curr.rightNode = this.build(((l + r) >> 1) + 1, r, leaves);
 		curr.value = compute.compute(curr.leftNode.value, curr.rightNode.value);
 		return curr;
 	}
 	
-	private void pushDown(Node <T> node) {
+	private void pushDown(Node node) {
 		if(node.pushDown == null)
 			return;
 		node.leftNode = update(node.leftNode, node.firstInPos, (node.firstInPos + node.lastInPos) >> 1, node.pushDown);
@@ -84,12 +84,12 @@ class SegmentTree <T> {
 		node.pushDown = null;
 	}
 		
-	private Node <T> update(Node <T> oldNode, int l, int r, T value) {
+	private Node update(Node oldNode, int l, int r, T value) {
 		if(l > r)
 			return null;
 		if(oldNode == null)
-			oldNode = new Node <> (l, r, null);
-    			Node <T> newNode = oldNode.clone();
+			oldNode = new Node(l, r, null);
+    			Node newNode = oldNode.clone();
 		if(newNode.firstInPos == newNode.lastInPos) {
 			newNode.value = modify.modify(newNode.value, value);
 			return newNode;
@@ -117,7 +117,7 @@ class SegmentTree <T> {
 		return update(lastVersion(), l, r, value);
 	}
 	
-	private T query(Node <T> curr, int l, int r) {
+	private T query(Node curr, int l, int r) {
 		if(l > r)
 			return null;
 		if(curr == null)
