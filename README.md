@@ -1,4 +1,4 @@
-# GeneralPurpose_SegmentTree
+# General purpose Segment Tree
 
 A parametric, fully persistent Segment Tree which supports fast updates (through lazy propagation).
 
